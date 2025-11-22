@@ -1,202 +1,129 @@
-## Árvore AVL no Projeto de Catálogo de Produtos
+# Como a AVL funciona neste projeto 🌳
 
-Esta documentação explica como a estrutura de dados Árvore AVL (Adelson-Velsky e Landis) é utilizada neste projeto para gerenciar o catálogo de produtos de forma eficiente e balanceada.
+A Árvore AVL é a estrutura responsável por manter o catálogo de produtos sempre ordenado, eficiente e balanceado, garantindo desempenho consistente mesmo com milhares de itens.
 
----
+## 📊 **Estrutura Principal**
 
-### 1. Objetivo da AVL no Projeto
+A AVL armazena os produtos de forma **ordenada e balanceada** usando o **código do produto** como chave de ordenação.
 
-A AVL garante que operações de inserção, busca, atualização e remoção de produtos mantenham sempre complexidade O(log n), independentemente da ordem em que os produtos são adicionados. Isso preserva performance mesmo em catálogos com muitos itens.
-
----
-
-### 2. O que Cada Nó Armazena
-
-Cada nó (`No`) contém:
-
-- `chave`: código numérico único do produto (int) – usado como critério de ordenação.
-- `valor`: instância de `Produto` (nome, preço, quantidade, categoria).
-- `esquerda` / `direita`: referências para nós filhos.
-- `altura`: usada para cálculo de balanceamento.
-
-Arquivo principal da estrutura: `backend/arvore_avl.py`
-
----
-
-### 3. Operações Principais
-
-#### Inserção (`inserir_chave`)
-
-1. Percorre recursivamente até posição de inserção.
-2. Atualiza altura do nó.
-3. Calcula fator de balanceamento: `altura(esquerda) - altura(direita)`.
-4. Se desbalanceado aplica uma das rotações:
-   - Caso Esquerda-Esquerda: rotação à direita.
-   - Caso Direita-Direita: rotação à esquerda.
-   - Caso Esquerda-Direita: rotação à esquerda no filho + direita na raiz.
-   - Caso Direita-Esquerda: rotação à direita no filho + esquerda na raiz.
-
-#### Remoção (`remover_chave`)
-
-1. Localiza o nó pela chave.
-2. Caso tenha dois filhos: substitui pelo sucessor in-ordem (menor da subárvore direita).
-3. Atualiza alturas na subida da recursão.
-4. Rebalanceia aplicando rotações conforme necessário.
-
-#### Busca (`buscar`)
-
-Percurso binário comparando a chave buscada com as chaves dos nós: segue para esquerda se menor, direita se maior. O(log n).
-
-#### Percurso Em Ordem (`percorrer_em_ordem` / usado indiretamente)
-
-Utilizado para listar produtos ordenados por código: esquerda → raiz → direita.
-
-#### Geração de Diagrama (`gerar_mermaid`)
-
-Cria string Mermaid para visualização hierárquica dos nós com: nome (limitado), preço e quantidade.
-
----
-
-### 4. Integração com Camada de Catálogo
-
-O arquivo `backend/catalogo_produtos_avl.py` encapsula a AVL fornecendo operações de alto nível:
-
-- `adicionar_produto(produto)` → converte produto para nó (chave = `produto.codigo`).
-- `remover_produto(codigo)` → remove nó correspondente.
-- `buscar_produto(codigo)` → retorna produto ou `None`.
-- `listar_produtos()` → monta lista ordenada de dicionários para resposta da API.
-- `para_mermaid()` → expõe diagrama para o frontend.
-
----
-
-### 5. Exposição via API (FastAPI)
-
-No arquivo `backend/app.py`:
-
-- POST `/produtos` → chama `catalogo.adicionar_produto`.
-- GET `/produtos/{codigo}` → chama `catalogo.buscar_produto`.
-- DELETE `/produtos/{codigo}` → chama `catalogo.remover_produto`.
-- PUT `/produtos/{codigo}` → remove e re-insere (mantém balanceamento).
-- GET `/tree/visualize` ou `/arvore/avl` → diagrama Mermaid da estrutura.
-- GET `/estatisticas` → altura atual e total de produtos.
-
----
-
-### 6. Exemplo de Inserções
-
-Inserindo produtos com códigos: 100, 50, 150, 25, 75, 125, 175
-Resultado balanceado:
-
+``` Python
+# Cada nó armazena:
+- chave: código do produto (int) - usado para ordenação
+- valor: objeto Produto completo (nome, preço, quantidade, etc.)
+- esquerda/direita: referências para filhos
+- altura: para manter balanceamento
 ```
+
+## 🔑 **Operações Principais**
+### **1. Inserção**
+
+```Python
+# Exemplo de uso:
+produto = Produto(codigo=150, nome="Notebook", preco=3500.0, quantidade=10)
+arvore.inserir_chave(chave=150, valor=produto)
+```
+
+**Processo:**
+
+1. Insere recursivamente mantendo ordem BST (código menor → esquerda, maior → direita)
+2. Calcula o fator de balanceamento
+3. Se desbalanceado (|balanceamento| > 1), aplica rotações:
+    - **Esquerda-Esquerda**: rotação direita simples
+    - **Direita-Direita**: rotação esquerda simples
+    - **Esquerda-Direita**: rotação esquerda + direita (dupla)
+    - **Direita-Esquerda**: rotação direita + esquerda (dupla)
+
+**Complexidade:** [O(log n)] - sempre balanceada!
+```Python
+## Busca por código do produto
+
+no = arvore.buscar(arvore.raiz, chave=150)
+
+produto = no.valor if no else None
+```
+
+**2. Buscar**
+
+```Python
+## Busca por código do produto
+
+no = arvore.buscar(arvore.raiz, chave=150)
+
+produto = no.valor if no else None
+```
+**Complexidade:** [O(log n)] - navegação binária otimizada
+
+### **3. Remoção**
+```Python
+##arvore.remover_chave(chave=150)
+```
+**Processo:**
+
+1. Remove o nó encontrado
+2. Se tem 2 filhos: substitui pelo sucessor in-ordem (menor nó da direita)
+3. Rebalanceia a árvore subindo recursivamente
+
+**Complexidade:** [O(log n)](vscode-file://vscode-app/c:/Users/Alejj/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)
+
+## 🎯 **Por que AVL neste projeto?**
+
+|Vantagem|Impacto|
+|---|---|
+|**Busca rápida**|Encontra produtos por código em O(log n)|
+|**Sempre balanceada**|Garante performance mesmo com muitos produtos|
+|**Ordenação automática**|Produtos ficam ordenados por código|
+|**Visualização clara**|Método [gerar_mermaid()](vscode-file://vscode-app/c:/Users/Alejj/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) mostra a estrutura|
+
+## 📈 **Exemplo Prático**
+
+```txt
         100
        /   \
      50     150
     /  \    /  \
-   25  75 125 175
+   25  75 125  175
 ```
 
-Altura = 3. Todas as operações de busca por código seguem no máximo três comparações.
 
----
 
-### 7. Complexidades
+**Altura:** 3 (balanceada!)  
+**Busca pelo produto 175:** apenas 3 comparações (100 → 150 → 175)
 
-- Inserção: O(log n)
-- Remoção: O(log n)
-- Busca: O(log n)
-- Listagem completa (percurso em ordem): O(n)
+## 🔄 **Integração com o Backend**
 
-O balanceamento automático evita crescimento degenerado (como ocorreria numa árvore binária simples em ordem crescente).
+No arquivo `app.py`, a AVL é usada para:
 
----
+```Python
+# Inicialização
+arvore = ArvoreAVL()
 
-### 8. Visualização Mermaid
+# Adicionar produto
+@app.post("/produtos")
+def adicionar_produto(produto: Produto):
+    arvore.inserir_chave(produto.codigo, produto)
 
-Exemplo simplificado de saída (`/tree/visualize`):
+# Buscar produto
+@app.get("/produtos/{codigo}")
+def obter_produto(codigo: int):
+    no = arvore.buscar(arvore.raiz, codigo)
+    return no.valor if no else None
 
+# Listar todos (em ordem crescente de código)
+@app.get("/produtos")
+def listar_produtos():
+    # Percorre em ordem: esquerda → raiz → direita
 ```
-graph TD;
-Node100["Notebook<br/>R$ 3500.00<br/>Qtd: 10"] --> Node50
-Node100 --> Node150
-style Node100 fill:#60a5fa,stroke:#2563eb,stroke-width:2px,color:#fff
-...
-```
+## 💡 **Visualização Mermaid**
 
-O frontend interpreta essa string para desenhar o gráfico interativo.
+O método [gerar_mermaid()] cria um diagrama mostrando:
 
----
+- Nome do produto (limitado a 20 chars)
+- Preço formatado
+- Quantidade em estoque
+- Estrutura da árvore com cores
 
-### 9. Possíveis Extensões Futuras
-
-- Persistência em disco (salvar/recuperar AVL entre reinícios).
-- Estatísticas adicionais: profundidade média, fator de preenchimento.
-- Rotas para limpeza completa (`reset`) da árvore.
-- Suporte a atualização de chave sem remover/reinserir.
+Isso permite **ver visualmente** como os produtos estão organizados na memória!
 
 ---
 
-### 10. Benefícios no Contexto do Projeto
-
-| Benefício                   | Impacto                                        |
-| ---------------------------- | ---------------------------------------------- |
-| Ordenação automática      | Lista de produtos sempre por código           |
-| Performance previsível      | Evita pior caso de árvore degenerada          |
-| Visualização clara         | Facilita entendimento didático da estrutura   |
-| Simplicidade de integração | API chama métodos de alto nível do catálogo |
-
----
-
-### 11. Código Essencial (Trechos)
-
-Inserção com rebalanceamento (resumo):
-
-```python
-def inserir(self, no, chave, valor=None):
-    if not no:
-        return No(chave, valor)
-    elif chave < no.chave:
-        no.esquerda = self.inserir(no.esquerda, chave, valor)
-    else:
-        no.direita = self.inserir(no.direita, chave, valor)
-
-    no.altura = 1 + max(self.obter_altura(no.esquerda), self.obter_altura(no.direita))
-    balanceamento = self.obter_balanceamento(no)
-    # Casos de rotação ...
-    return no
-```
-
-Remoção (conceito chave): substituição pelo sucessor in-ordem quando há dois filhos.
-
----
-
-### 12. Como Reiniciar a AVL (Limpar Produtos)
-
-Enquanto não há persistência, reiniciar o processo do backend limpa todos os produtos:
-
-```powershell
-Stop-Process -Name "python" -Force -ErrorAction SilentlyContinue
-cd backend
-uvicorn app:app --reload --host 0.0.0.0 --port 8000
-```
-
----
-
-### 13. Perguntas Frequentes (FAQ)
-
-**Por que remover e reinserir para atualizar?**  Simplifica a lógica garantindo que balanceamento e chave permaneçam consistentes.
-
-**Por que usar código como chave?**  É um identificador único e facilita ordenação crescente dos produtos.
-
-**O que acontece se inserir códigos em ordem crescente?**  A AVL se rebalanceia aplicando rotações, evitando altura O(n).
-
----
-
-### 14. Referências
-
-- AVL original: G. M. Adelson-Velsky, E. M. Landis (1962)
-- FastAPI: https://fastapi.tiangolo.com/
-- Mermaid: https://mermaid.js.org/
-
----
-
-Documento gerado automaticamente para suporte ao entendimento da estrutura AVL utilizada neste projeto.
+**Resumo:** A AVL garante que operações de busca, inserção e remoção sejam **sempre rápidas** (O(log n)), independente da ordem em que os produtos são adicionados. É como ter um catálogo que se reorganiza automaticamente! 📚✨
